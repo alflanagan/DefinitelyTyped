@@ -36,12 +36,20 @@ type AccessTokenResponseData = {
   [key: string]: string | number | undefined
 }
 
-export function client(
+declare function client(
   axios: AxiosInstance,
   options: ClientOpts
 ): () => Promise<AccessTokenResponseData | APICallErrorData>
 
-export function interceptor(
+declare function interceptor(
   tokenProvider: AxiosTokenProvider.TokenProvider,
   authenticate: any
 ): AxiosTokenProvider.TokenProvider
+
+export {
+    client,
+    interceptor,
+    APICallErrorData,
+    AccessTokenResponseData,
+    ClientOpts
+}
