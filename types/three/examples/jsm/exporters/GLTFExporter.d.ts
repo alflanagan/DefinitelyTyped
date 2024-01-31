@@ -1,4 +1,4 @@
-import { Object3D, AnimationClip, Texture, Material, Mesh } from '../../../src/Three';
+import { Object3D, AnimationClip, Texture, Material, Mesh } from '../../../src/Three.js';
 
 export interface GLTFExporterOptions {
     /**
@@ -91,7 +91,7 @@ export class GLTFExporter {
 export class GLTFWriter {
     constructor();
 
-    setPlugins(plugins: GLTFExporterPlugin[]);
+    setPlugins(plugins: GLTFExporterPlugin[]): void;
 
     /**
      * Parse scenes and generate GLTF output

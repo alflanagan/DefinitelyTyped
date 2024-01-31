@@ -1,17 +1,25 @@
-import { Color } from './../math/Color';
-import { Texture } from './../textures/Texture';
-import { MaterialParameters, Material } from './Material';
-import { Combine } from '../constants';
-import { ColorRepresentation } from '../utils';
+import { Color, ColorRepresentation } from '../math/Color.js';
+import { Texture } from '../textures/Texture.js';
+import { MaterialParameters, Material } from './Material.js';
+import { Combine, NormalMapTypes } from '../constants.js';
+import { Vector2 } from '../Three.js';
 
 export interface MeshLambertMaterialParameters extends MaterialParameters {
+    bumpMap?: Texture | undefined;
+    bumpScale?: number | undefined;
     color?: ColorRepresentation | undefined;
+    displacementMap?: Texture | undefined;
+    displacementScale?: number | undefined;
+    displacementBias?: number | undefined;
     emissive?: ColorRepresentation | undefined;
     emissiveIntensity?: number | undefined;
     emissiveMap?: Texture | null | undefined;
+    flatShading?: boolean | undefined;
     map?: Texture | null | undefined;
     lightMap?: Texture | null | undefined;
     lightMapIntensity?: number | undefined;
+    normalMap?: Texture | undefined;
+    normalScale?: Vector2 | undefined;
     aoMap?: Texture | null | undefined;
     aoMapIntensity?: number | undefined;
     specularMap?: Texture | null | undefined;
@@ -31,6 +39,13 @@ export class MeshLambertMaterial extends Material {
     constructor(parameters?: MeshLambertMaterialParameters);
 
     /**
+     * Read-only flag to check if a given object is of type {@link MeshLambertMaterial}.
+     * @remarks This is a _constant_ value
+     * @defaultValue `true`
+     */
+    readonly isMeshLambertMaterial: true;
+
+    /**
      * @default 'MeshLambertMaterial'
      */
     type: string;
@@ -39,6 +54,31 @@ export class MeshLambertMaterial extends Material {
      * @default new THREE.Color( 0xffffff )
      */
     color: Color;
+
+    /**
+     * @default null
+     */
+    bumpMap: Texture | null;
+
+    /**
+     * @default 1
+     */
+    bumpScale: number;
+
+    /**
+     * @default null
+     */
+    displacementMap: Texture | null;
+
+    /**
+     * @default 1
+     */
+    displacementScale: number;
+
+    /**
+     * @default 0
+     */
+    displacementBias: number;
 
     /**
      * @default new THREE.Color( 0x000000 )
@@ -56,6 +96,11 @@ export class MeshLambertMaterial extends Material {
     emissiveMap: Texture | null;
 
     /**
+     * @default false
+     */
+    flatShading: boolean;
+
+    /**
      * @default null
      */
     map: Texture | null;
@@ -69,6 +114,18 @@ export class MeshLambertMaterial extends Material {
      * @default 1
      */
     lightMapIntensity: number;
+
+    /**
+     * @default null
+     */
+    normalMap: Texture | null;
+
+    normalMapType: NormalMapTypes;
+
+    /**
+     * @default new THREE.Vector2( 1, 1 )
+     */
+    normalScale: Vector2;
 
     /**
      * @default null
