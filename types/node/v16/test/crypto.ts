@@ -1119,6 +1119,28 @@ import { promisify } from "node:util";
         key,
         dsaEncoding: "der",
     });
+
+    const jwk = key.export({ format: "jwk" });
+    crypto.sign("sha256", Buffer.from("asd"), {
+        format: "jwk",
+        key: jwk,
+        dsaEncoding: "der",
+    });
+    crypto.sign("sha256", Buffer.from("asd"), {
+        format: "jwk",
+        key: jwk,
+        dsaEncoding: "der",
+    }, callback);
+    promisify(crypto.sign)("sha256", Buffer.from("asd"), {
+        format: "jwk",
+        key: jwk,
+        dsaEncoding: "der",
+    }).then((signature: Buffer) => {});
+    crypto.createSign("sha256").update(Buffer.from("asd")).sign({
+        format: "jwk",
+        key: jwk,
+        dsaEncoding: "der",
+    });
 }
 
 {
@@ -1174,6 +1196,47 @@ import { promisify } from "node:util";
     crypto.createVerify("sha256").update(Buffer.from("asd")).verify(
         {
             key,
+            dsaEncoding: "der",
+        },
+        Buffer.from("sig"),
+    );
+
+    const jwk = key.export({ format: "jwk" });
+    crypto.verify(
+        "sha256",
+        Buffer.from("asd"),
+        {
+            format: "jwk",
+            key: jwk,
+            dsaEncoding: "der",
+        },
+        Buffer.from("sig"),
+    );
+    crypto.verify(
+        "sha256",
+        Buffer.from("asd"),
+        {
+            format: "jwk",
+            key: jwk,
+            dsaEncoding: "der",
+        },
+        Buffer.from("sig"),
+        callback,
+    );
+    promisify(crypto.verify)(
+        "sha256",
+        Buffer.from("asd"),
+        {
+            format: "jwk",
+            key: jwk,
+            dsaEncoding: "der",
+        },
+        Buffer.from("sig"),
+    ).then((result: boolean) => {});
+    crypto.createVerify("sha256").update(Buffer.from("asd")).verify(
+        {
+            format: "jwk",
+            key: jwk,
             dsaEncoding: "der",
         },
         Buffer.from("sig"),
@@ -1456,6 +1519,8 @@ import { promisify } from "node:util";
     // The lack of top level await makes it annoying to use generateKey so let's just fake it for typings.
     const key = null as unknown as crypto.webcrypto.CryptoKey;
     const buf = new Uint8Array(16);
+    // Oops, test relied on DOM `globalThis.length` before
+    const length = 123;
 
     subtle.encrypt({ name: "AES-CBC", iv: new Uint8Array(16) }, key, new TextEncoder().encode("hello")); // $ExpectType Promise<ArrayBuffer>
     subtle.decrypt({ name: "AES-CBC", iv: new Uint8Array(16) }, key, new ArrayBuffer(8)); // $ExpectType Promise<ArrayBuffer>

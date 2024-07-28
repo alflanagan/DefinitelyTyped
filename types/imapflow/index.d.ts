@@ -124,6 +124,12 @@ export class ImapFlow extends EventEmitter {
         query: FetchQueryObject,
         options?: { uid?: boolean; changedSince?: bigint; binary?: boolean },
     ): AsyncGenerator<FetchMessageObject, never, void>;
+
+    fetchAll(
+        range: SequenceString | number[] | SearchObject,
+        query: FetchQueryObject,
+        options?: { uid?: boolean; changedSince?: bigint; binary?: boolean },
+    ): Promise<FetchMessageObject[]>;
 }
 
 export interface ImapFlowOptions {
@@ -143,6 +149,16 @@ export interface ImapFlowOptions {
     logger?: Logger | false;
     emitLogs?: boolean;
     verifyOnly?: boolean;
+    logRaw?: boolean;
+    proxy?: string;
+    qresync?: boolean;
+    maxIdleTime?: number;
+    missingIdleCommand?: string;
+    disableBinary?: boolean;
+    disableAutoEnable?: boolean;
+    connectionTimeout?: number;
+    greetingTimeout?: number;
+    socketTimeout?: number;
 }
 
 export interface AppendResonseObject {

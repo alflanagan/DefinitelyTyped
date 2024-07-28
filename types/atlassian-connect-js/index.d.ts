@@ -83,6 +83,16 @@ declare namespace AP {
     function resize(width: string, height: string): void;
 
     /**
+     * Undocumented: Resize the iframe according to content.
+     *
+     * Only content within an element with the class `ac-content` will be resized automatically.
+     * Content without this identifier is sized according to the `body` element, and will dynamically grow, but not shrink.
+     *
+     * Note that this method cannot be used in dialogs.
+     */
+    function resize(): void;
+
+    /**
      * Resize the iframe, so that it takes the entire page. Add-on may define to hide the footer using data-options.
      *
      * Note that this method is only available for general page modules.
@@ -502,6 +512,8 @@ declare namespace AP {
      * The dialog is opened over the entire window, rather than within the iframe itself.
      */
     namespace dialog {
+        type DialogSizes = "small" | "medium" | "large" | "x-large" | "maximum" | "fullscreen";
+
         interface DialogOptions {
             /**
              * The module key of a dialog, or the key of a page or web-item that you want to open as a dialog.
@@ -510,8 +522,9 @@ declare namespace AP {
 
             /**
              * Opens the dialog at a preset size: small, medium, large, x-large or fullscreen (with chrome).
+             * Sizes are defined in https://developer.atlassian.com/cloud/confluence/modules/dialog/ and replace the width and height options.
              */
-            size?: "small" | "medium" | "large" | "x-large" | "fullscreen" | undefined;
+            size?: DialogSizes | Uppercase<DialogSizes> | undefined;
 
             /**
              * if size is not set, define the width as a percentage (append a % to the number) or pixels.
@@ -854,6 +867,22 @@ declare namespace AP {
         function getState(): string;
 
         /**
+         * Retrieves the current state of the history stack and returns the value. The returned value is the same as what was set with the pushState method.
+         * @param type Type of requested value (optional). Valid values are undefined, "hash" and "all".
+         * @param callback Asynchronous callback (optional) if retrieving state during page load.
+         */
+        function getState(type: "hash" | undefined, callback: (state: string) => void): void;
+        function getState(
+            type: "all",
+            callback: (state: {
+                key: string;
+                hash: string;
+                title: string;
+                href: string;
+            }) => void,
+        ): void;
+
+        /**
          * Updates the location's anchor with the specified value and pushes the given data onto the session history. Does not invoke popState callback.
          * @param newState
          * @param title
@@ -1032,6 +1061,16 @@ declare namespace AP {
         function openCreateIssueDialog(
             callback: (issues: object[]) => void,
             params: { pid: number; issueType: number; fields: object },
+        ): void;
+
+        /**
+         * Opens the issue dialog for an issue. A callback is invoked when the issue dialog is closed or an error occurs when opening the issue dialog.
+         * @param issueKey The key of the issue.
+         * @param callback Invoked when the dialog is closed. Takes a single parameter, either issueKey or, if the issue dialog isn't opened, an error key if it is impossible to open a issue dialog.
+         */
+        function openIssueDialog(
+            issueKey: string,
+            callback?: (issueKeyOrErr: string) => void,
         ): void;
 
         /**

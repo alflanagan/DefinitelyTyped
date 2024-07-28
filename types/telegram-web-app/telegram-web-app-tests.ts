@@ -14,7 +14,7 @@ btn.onClick(() => {
     app.close();
 });
 
-app.onEvent("viewportChanged", e => {
+app.onEvent("viewportChanged", (e) => {
     if (e.isStateStable) console.log("Done at", app.viewportHeight);
     else console.log("Changing, currently at ", app.viewportHeight);
 });
@@ -24,10 +24,10 @@ app.showPopup(
         message: "Hello",
         buttons: [{ type: "default", text: "Button text", id: "btn_id" }],
     },
-    btn_id => console.log(btn_id),
+    (btn_id) => console.log(btn_id),
 );
 
-app.onEvent("popupClosed", e => {
+app.onEvent("popupClosed", (e) => {
     console.log(e.button_id);
 });
 
@@ -64,8 +64,39 @@ app.CloudStorage.getKeys((err, keys) => {
     }
 });
 
-app.requestWriteAccess(success => {
+app.requestWriteAccess((success) => {
     const test = success; // $ExpectType boolean
 });
 
 app.onEvent("writeAccessRequested", ({ status }) => {});
+
+app.SettingsButton.show();
+
+app.requestContact((success, req) => {
+    if (req.status === "sent") {
+        // no error
+        req.response;
+    } else {
+        // @ts-expect-error
+        req.response;
+        req.status; // $ExpectType "cancelled"
+    }
+});
+
+app.onEvent("contactRequested", (req) => {
+    if (req.status === "sent") {
+        // no error
+        req.response;
+    } else {
+        // @ts-expect-error
+        req.response;
+        req.status; // $ExpectType "cancelled"
+    }
+});
+
+app.BiometricManager.init(() => console.log("init"));
+app.BiometricManager.openSettings();
+
+app.isVerticalSwipesEnabled; // $ExpectType boolean
+app.enableVerticalSwipes();
+app.disableVerticalSwipes();

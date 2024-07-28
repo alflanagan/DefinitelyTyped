@@ -118,12 +118,12 @@ export interface PlotScene {
 }
 
 export interface PlotRelayoutEvent extends Partial<Layout> {
-    "xaxis.range[0]"?: number | undefined;
-    "xaxis.range[1]"?: number | undefined;
-    "yaxis.range[0]"?: number | undefined;
-    "yaxis.range[1]"?: number | undefined;
-    "xaxis.autorange"?: boolean | undefined;
-    "yaxis.autorange"?: boolean | undefined;
+    "xaxis.range[0]"?: number;
+    "xaxis.range[1]"?: number;
+    "yaxis.range[0]"?: number;
+    "yaxis.range[1]"?: number;
+    "xaxis.autorange"?: boolean;
+    "yaxis.autorange"?: boolean;
 }
 
 export interface ClickAnnotationEvent {
@@ -137,10 +137,7 @@ export interface FrameAnimationEvent {
     name: string;
     frame: Frame;
     animation: {
-        frame: {
-            duration: number;
-            redraw: boolean;
-        };
+        frame: AnimationFrameOpts;
         transition: Transition;
     };
 }
@@ -295,16 +292,41 @@ export interface PlotlyHTMLElement extends HTMLElement {
 
 export interface ToImgopts {
     format: "jpeg" | "png" | "webp" | "svg";
-    width: number;
-    height: number;
+    /**
+     * If null, uses current graph width
+     */
+    width: number | null;
+    /**
+     * If null, uses current graph height
+     */
+    height: number | null;
     scale?: number | undefined;
 }
 
 export interface DownloadImgopts {
     format: "jpeg" | "png" | "webp" | "svg";
-    width: number;
-    height: number;
+    /**
+     * If null, uses current graph width
+     */
+    width: number | null;
+    /**
+     * If null, uses current graph height
+     */
+    height: number | null;
     filename: string;
+}
+
+export interface AnimationFrameOpts {
+    duration: number;
+    redraw: boolean;
+}
+
+export interface AnimationOpts {
+    mode: "immediate" | "next" | "afterall";
+    direction: "forward" | "reverse";
+    fromcurrent: boolean;
+    transition: Partial<Transition> | Array<Partial<Transition>>;
+    frame: Partial<AnimationFrameOpts> | Array<Partial<AnimationFrameOpts>>;
 }
 
 export interface PolarLayout {
@@ -378,6 +400,11 @@ export function react(
 export function addFrames(root: Root, frames: Array<Partial<Frame>>): Promise<PlotlyHTMLElement>;
 export function deleteFrames(root: Root, frames: number[]): Promise<PlotlyHTMLElement>;
 export function register(modules: PlotlyModule | PlotlyModule[]): void;
+export function animate(
+    root: Root,
+    frameOrGroupNameOrFrameList?: string | string[] | Partial<Frame> | Array<Partial<Frame>>,
+    opts?: Partial<AnimationOpts>,
+): Promise<void>;
 
 // Layout
 export interface Layout {
@@ -524,8 +551,10 @@ export interface Legend extends Label {
     valign: "top" | "middle" | "bottom";
     x: number;
     xanchor: "auto" | "left" | "center" | "right";
+    xref: "container" | "paper";
     y: number;
     yanchor: "auto" | "top" | "middle" | "bottom";
+    yref: "container" | "paper";
 }
 
 export type AxisType = "-" | "linear" | "log" | "date" | "category" | "multicategory";
@@ -569,6 +598,40 @@ export interface TickFormatStop {
     templateitemname: string;
 }
 
+export interface AutoRangeOptions {
+    clipmax: DTickValue;
+    clipmin: DTickValue;
+    include: DTickValue;
+    maxallowed: DTickValue;
+    minallowed: DTickValue;
+}
+
+export interface MinorAxisLayout {
+    dtick: DTickValue;
+    gridcolor: Color;
+    griddash: Dash;
+    gridwidth: number;
+    nticks: number;
+    showgrid: boolean;
+    tick0: DTickValue;
+    tickcolor: Color;
+    ticklen: number;
+    tickmode: "auto" | "linear" | "array";
+    ticks: "outside" | "inside" | "";
+    tickvals: any[];
+    tickwidth: number;
+}
+
+export interface RangeBreak {
+    bounds: any[];
+    dvalue: number;
+    enabled: boolean;
+    name: string;
+    pattern: "day of week" | "hour" | "";
+    templateitemname: string;
+    values: any[];
+}
+
 export interface Axis {
     /**
      * A single toggle to hide the axis while preserving interaction like dragging.
@@ -590,7 +653,8 @@ export interface Axis {
      */
     titlefont: Partial<Font>;
     type: AxisType;
-    autorange: true | false | "reversed";
+    autorange: true | false | "reversed" | "min reversed" | "max reversed" | "min" | "max";
+    autorangeoptions: Partial<AutoRangeOptions>;
     /**
      * 'If *normal*, the range is computed in relation to the extrema
      * of the input data.
@@ -805,6 +869,11 @@ export interface Axis {
      * Only has an effect on *multicategory* axes.
      */
     dividerwidth: number;
+
+    autotypenumbers: "convert types" | "strict";
+    labelalias: DTickValue;
+    maxallowed: DTickValue;
+    minallowed: DTickValue;
 }
 
 export type Calendar =
@@ -850,6 +919,28 @@ export interface LayoutAxis extends Axis {
     angle: any;
     griddash: Dash;
     l2p: (v: Datum) => number;
+
+    autotickangles: number[];
+    insiderange: any[];
+    matches: AxisName;
+    minor: Partial<MinorAxisLayout>;
+    rangebreaks: Array<Partial<RangeBreak>>;
+    ticklabelmode: "instant" | "period";
+    ticklabeloverflow: "allow" | "hide past div" | "hide past domain";
+    ticklabelposition:
+        | "outside"
+        | "inside"
+        | "outside top"
+        | "inside top"
+        | "outside left"
+        | "inside left"
+        | "outside right"
+        | "inside right"
+        | "outside bottom"
+        | "inside bottom";
+    ticklabelstep: number;
+    tickson: "labels" | "boundaries";
+    uirevision: DTickValue;
 }
 
 export interface SceneAxis extends Axis {
@@ -889,7 +980,7 @@ export interface ShapeLabel {
 }
 
 export interface Shape {
-    visible: boolean;
+    visible: boolean | "legendonly";
     layer: "below" | "above";
     type: "rect" | "circle" | "line" | "path";
     path: string;
@@ -909,6 +1000,13 @@ export interface Shape {
     opacity: number;
     line: Partial<ShapeLine>;
     label: Partial<ShapeLabel>;
+    showlegend: boolean;
+    legendgroup: string;
+    legendgrouptitle: {
+        text: string;
+        font?: Partial<Font>;
+    };
+    legendrank: number;
 }
 
 export interface Margin {
@@ -1404,7 +1502,7 @@ export interface PlotData {
     locations: Datum[];
     reversescale: boolean;
     colorbar: Partial<ColorBar>;
-    offset: number;
+    offset: number | number[];
     contours: Partial<{
         coloring: "fill" | "heatmap" | "lines" | "none";
         end: number;

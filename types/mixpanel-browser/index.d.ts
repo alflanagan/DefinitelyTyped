@@ -1,5 +1,7 @@
 export type Persistence = "cookie" | "localStorage";
 
+export type ApiPayloadFormat = "base64" | "json";
+
 export type PushItem = Array<string | Dict>;
 
 export type Query = string | Element | Element[];
@@ -52,6 +54,7 @@ export interface Config {
     api_method: string;
     api_transport: string;
     app_host: string;
+    api_payload_format: ApiPayloadFormat;
     autotrack: boolean;
     cdn: string;
     cookie_domain: string;
@@ -62,13 +65,18 @@ export interface Config {
     cookie_name: string;
     loaded: (mixpanel: Mixpanel) => void;
     store_google: boolean;
+    stop_utm_persistence: boolean;
     save_referrer: boolean;
     test: boolean;
     verbose: boolean;
     img: boolean;
     debug: boolean;
     track_links_timeout: number;
-    track_pageview: boolean;
+    track_pageview:
+        | boolean
+        | "url-with-path"
+        | "url-with-path-and-query-string"
+        | "full-url";
     skip_first_touch_marketing: boolean;
     cookie_expiration: number;
     upgrade: boolean;

@@ -90,6 +90,7 @@ csstree.generate(ast, {
             return handlers.result.call(handlers);
         },
     }),
+    mode: "spec",
 });
 
 const property = csstree.property("*-vendor-property"); // $ExpectType Property
@@ -366,6 +367,9 @@ switch (ast.type) {
 
     case "MediaQueryList":
         ast.children; // $ExpectType List<CssNode>
+        break;
+
+    case "NestingSelector":
         break;
 
     case "Nth":
@@ -706,6 +710,13 @@ csstree.parse(".selector { /* comment */ }", {
     onComment(value, loc) {
         value; // $ExpectType string
         loc; // $ExpectType CssLocation
+    },
+});
+
+csstree.parse(".a { ::: invalid css ::: }", {
+    onParseError(error, fallbackNode) {
+        error; // $ExpectType SyntaxParseError
+        fallbackNode; // $ExpectType CssNode
     },
 });
 

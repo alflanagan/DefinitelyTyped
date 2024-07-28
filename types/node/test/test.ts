@@ -1,5 +1,22 @@
 import { Transform, TransformCallback, TransformOptions } from "node:stream";
-import { after, afterEach, before, beforeEach, describe, it, Mock, mock, only, run, skip, test, todo } from "node:test";
+import {
+    after,
+    afterEach,
+    before,
+    beforeEach,
+    describe,
+    it,
+    Mock,
+    mock,
+    only,
+    run,
+    skip,
+    suite,
+    type SuiteContext,
+    test,
+    type TestContext,
+    todo,
+} from "node:test";
 import { dot, junit, lcov, spec, tap, TestEvent } from "node:test/reporters";
 
 // run without options
@@ -134,6 +151,7 @@ test.test.test("chained self ref", (t) => {
     t.test;
 });
 test.skip("skip", () => {});
+test.suite("suite", () => {});
 test.todo("todo", () => {});
 test.only("only", () => {});
 
@@ -314,6 +332,109 @@ describe(1, () => {});
 // @ts-expect-error
 it(1, () => {});
 
+// suite() signatures
+// $ExpectType Promise<void>
+suite();
+// $ExpectType Promise<void>
+suite("foo");
+// $ExpectType Promise<void>
+suite("foo", () => {});
+// $ExpectType Promise<void>
+suite("foo", {
+    concurrency: false,
+    only: true,
+    signal: new AbortController().signal,
+    skip: false,
+    timeout: 30_000,
+    todo: true,
+});
+// $ExpectType Promise<void>
+suite("foo", {
+    concurrency: 5,
+    todo: "foo",
+}, async () => {});
+// $ExpectType Promise<void>
+suite(() => {});
+
+// suite.skip() signatures
+// $ExpectType Promise<void>
+suite.skip();
+// $ExpectType Promise<void>
+suite.skip("foo");
+// $ExpectType Promise<void>
+suite.skip("foo", () => {});
+// $ExpectType Promise<void>
+suite.skip("foo", {
+    concurrency: false,
+    only: true,
+    signal: new AbortController().signal,
+    timeout: 30_000,
+    todo: true,
+});
+// $ExpectType Promise<void>
+suite.skip("foo", {
+    concurrency: 5,
+    todo: "foo",
+}, async () => {});
+// $ExpectType Promise<void>
+suite.skip(() => {});
+
+// suite.todo() signatures
+// $ExpectType Promise<void>
+suite.todo();
+// $ExpectType Promise<void>
+suite.todo("foo");
+// $ExpectType Promise<void>
+suite.todo("foo", () => {});
+// $ExpectType Promise<void>
+suite.todo("foo", {
+    concurrency: false,
+    only: true,
+    signal: new AbortController().signal,
+    skip: false,
+    timeout: 30_000,
+});
+// $ExpectType Promise<void>
+suite.todo("foo", {
+    concurrency: 5,
+    timeout: Infinity,
+}, async () => {});
+// $ExpectType Promise<void>
+suite.todo(() => {});
+
+// suite.only() signatures
+// $ExpectType Promise<void>
+suite.only();
+// $ExpectType Promise<void>
+suite.only("foo");
+// $ExpectType Promise<void>
+suite.only("foo", () => {});
+// $ExpectType Promise<void>
+suite.only("foo", {
+    concurrency: false,
+    signal: new AbortController().signal,
+    skip: false,
+    timeout: 30_000,
+    todo: true,
+});
+// $ExpectType Promise<void>
+suite.only("foo", {
+    concurrency: 5,
+    todo: "foo",
+}, async () => {});
+// $ExpectType Promise<void>
+suite.only(() => {});
+
+// SuiteContext
+suite("foo", (context) => {
+    // $ExpectType SuiteContext
+    context;
+    // $ExpectType string
+    context.name;
+    // $ExpectType AbortSignal
+    context.signal;
+});
+
 // Hooks
 // - without callback
 before(() => {});
@@ -375,6 +496,22 @@ test("mocks a counting function", (t) => {
     const fn = t.mock.fn(addOne, addTwo, { times: 2 });
     // $ExpectType number
     fn();
+
+    const mock = t.mock.module("node:readline", {
+        namedExports: {
+            fn() {
+                return 42;
+            },
+        },
+        defaultExport: {
+            foo() {
+                return "bar";
+            },
+        },
+        cache: true,
+    });
+    // $ExpectType void
+    mock.restore();
 });
 
 test("spies on an object method", (t) => {
@@ -645,17 +782,17 @@ test("mocks a setter", (t) => {
 
 // @ts-expect-error
 dot();
-// $ExpectType AsyncGenerator<"\n" | "." | "X", void, unknown>
+// $ExpectType AsyncGenerator<"\n" | "." | "X", void, unknown> || AsyncGenerator<"\n" | "." | "X", void, any>
 dot("" as any);
 // @ts-expect-error
 tap();
-// $ExpectType AsyncGenerator<string, void, unknown>
+// $ExpectType AsyncGenerator<string, void, unknown> || AsyncGenerator<string, void, any>
 tap("" as any);
 // $ExpectType Spec
 new spec();
 // @ts-expect-error
 junit();
-// $ExpectType AsyncGenerator<string, void, unknown>
+// $ExpectType AsyncGenerator<string, void, unknown> || AsyncGenerator<string, void, any>
 junit("" as any);
 // $ExpectType Lcov
 new lcov();
@@ -756,3 +893,37 @@ class TestReporter extends Transform {
     }
 }
 const createdMock: Mock<() => undefined> = mock.fn(() => undefined);
+// @ts-expect-error
+createdMock.mock.mockImplementation(() => null);
+createdMock.mock.mockImplementation(() => undefined);
+// @ts-expect-error
+createdMock.mock.mockImplementationOnce(() => null);
+createdMock.mock.mockImplementationOnce(() => undefined);
+
+// Allows for typing of TestContext outside of a test
+const contextTest = (t: TestContext) => {
+    // $ExpectType TestContext
+    t;
+};
+
+const suiteTest = (t: SuiteContext) => {
+    // $ExpectType SuiteContext
+    t;
+};
+
+describe("test context in describe/it", (suite) => {
+    suiteTest(suite);
+    it("test context exportation", (t) => {
+        contextTest(t);
+    });
+});
+
+test("test on the default export", (t) => {
+    contextTest(t);
+});
+
+// @ts-expect-error Should not be able to instantiate a TestContext
+const invalidTestContext = new TestContext();
+
+// @ts-expect-error Should not be able to instantiate a SuiteContext
+const invalidSuiteContext = new SuiteContext();

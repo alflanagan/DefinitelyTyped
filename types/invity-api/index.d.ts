@@ -36,6 +36,7 @@ export const cryptoSymbols: readonly [
     "XLM",
     "XMR",
     "XRP",
+    "TXRP",
     "XTZ",
     "AE",
     "ALGO",
@@ -239,6 +240,48 @@ export const cryptoSymbols: readonly [
 
 export type CryptoSymbol = typeof cryptoSymbols[number];
 
+export type FiatCurrencyCode =
+    | "usd"
+    | "eur"
+    | "gbp"
+    | "aed"
+    | "ars"
+    | "aud"
+    | "bdt"
+    | "brl"
+    | "cad"
+    | "chf"
+    | "clp"
+    | "cny"
+    | "czk"
+    | "dkk"
+    | "hkd"
+    | "huf"
+    | "idr"
+    | "ils"
+    | "inr"
+    | "jpy"
+    | "krw"
+    | "kwd"
+    | "lkr"
+    | "mxn"
+    | "myr"
+    | "nok"
+    | "nzd"
+    | "php"
+    | "pln"
+    | "rub"
+    | "sar"
+    | "sek"
+    | "sgd"
+    | "thb"
+    | "try"
+    | "twd"
+    | "vnd"
+    | "zar";
+
+export type FiatCurrenciesProps = Record<FiatCurrencyCode, number>;
+
 // buy types
 
 export type BuyTradeFinalStatus =
@@ -259,6 +302,7 @@ export type BuyCryptoPaymentMethod =
     | "eps"
     | "bankTransfer"
     | "creditCard"
+    | "debitCard"
     | "giropay"
     | "iDeal"
     | "sofort"
@@ -267,6 +311,7 @@ export type BuyCryptoPaymentMethod =
     | "poli"
     | "dcinterac"
     | "applePay"
+    | "googlePay"
     | "paynow"
     | "fps"
     | "promptpay"
@@ -282,7 +327,8 @@ export type BuyTradeTag = "renewed" | "alternativeCurrency" | "bestRate" | "favo
 
 export interface BuyProviderInfo {
     name: string; // simplex
-    companyName: string; // Simplex
+    companyName: string; // UAB Invity Finance
+    brandName?: string; // Invity
     logo: string; // simplex-icon.jpg
     isActive: boolean;
     isDisabled?: boolean;
@@ -301,6 +347,7 @@ export interface BuyListResponse {
     country: string;
     suggestedFiatCurrency?: string | undefined; // optional field, fiat currency based on user's IP
     providers: BuyProviderInfo[];
+    defaultAmountsOfFiatCurrencies: FiatCurrenciesProps;
 }
 
 export interface BuyTradeQuoteRequest {
@@ -708,6 +755,7 @@ export interface WatchSellTradeResponse {
     error?: string | undefined; // something went wrong
     destinationAddress?: string | undefined; // crypto address to which sent crypto currency to sell
     destinationPaymentExtraId?: string | undefined; // Extra ID for payments to exchange for networks that require it (destinationTag)
+    cryptoStringAmount?: string; // Crypto amount to send in case of change on provider's side (Banxa)
 }
 
 export type SpendTrade = SellVoucherTrade;

@@ -178,6 +178,14 @@ const graphDiv = "#test";
             marker: { line: { width: 2 } },
             offset: -0.25,
         },
+        {
+            type: "bar",
+            labels: ["Eve", "Cain", "Seth", "Enos", "Noam", "Abel", "Awan", "Enoch", "Azura"],
+            parents: ["", "Eve", "Eve", "Seth", "Seth", "Eve", "Eve", "Awan", "Eve"],
+            values: [65, 14, 12, 10, 2, 6, 6, 4, 4],
+            marker: { line: { width: 2 } },
+            offset: [-0.25, 0.25, -0.25, 0.25, -0.25, 0.25, -0.25, 0.25, -0.25],
+        },
     ];
 
     const layout = {
@@ -1099,3 +1107,65 @@ function rand() {
 
     Plotly.newPlot("myDiv", data, layout);
 })();
+
+//////////////////////////////////////////////////////////////////////
+// Plotly.animate as per https://plot.ly/javascript/animations/
+(() => {
+    Plotly.animate("myDiv", {
+        data: [{ y: [Math.random(), Math.random(), Math.random()] }],
+        traces: [0],
+        layout: {},
+    }, {
+        transition: {
+            duration: 500,
+            easing: "cubic-in-out",
+        },
+        frame: {
+            duration: 500,
+        },
+    });
+
+    var min = 0.45 * Math.random();
+    var max = 0.55 + 0.45 * Math.random();
+    Plotly.animate("myDiv", {
+        layout: {
+            xaxis: { range: [min, max] },
+            yaxis: { range: [min, max] },
+        },
+    }, {
+        transition: {
+            duration: 500,
+            easing: "cubic-in-out",
+        },
+    });
+
+    Plotly.animate("myDiv", ["frame1", "frame2"], {
+        frame: [
+            { duration: 1500 },
+            { duration: 500 },
+        ],
+        transition: [
+            { duration: 800, easing: "elastic-in" },
+            { duration: 100, easing: "cubic-in" },
+        ],
+        mode: "afterall",
+    });
+
+    Plotly.animate("myDiv", {
+        data: [{ x: [], y: [] }],
+    }, {
+        transition: {
+            duration: 0,
+        },
+        frame: {
+            duration: 0,
+            redraw: false,
+        },
+    });
+
+    var ids = ["1", "2", "3", "4", "5", "6"];
+
+    Plotly.animate("myDiv", [{
+        data: [{ ids: ids }],
+    }]);
+});

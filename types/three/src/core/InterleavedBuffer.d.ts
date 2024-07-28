@@ -1,6 +1,6 @@
-import { InterleavedBufferAttribute } from './InterleavedBufferAttribute.js';
-import { Usage } from '../constants.js';
-import { TypedArray } from './BufferAttribute.js';
+import { Usage } from "../constants.js";
+import { TypedArray } from "./BufferAttribute.js";
+import { InterleavedBufferAttribute } from "./InterleavedBufferAttribute.js";
 
 /**
  * **"Interleaved"** means that multiple attributes, possibly of different types, (e.g., _position, normal, uv, color_) are packed into a single array buffer.
@@ -10,6 +10,8 @@ import { TypedArray } from './BufferAttribute.js';
  * @see {@link https://github.com/mrdoob/three.js/blob/master/src/core/InterleavedBuffer.js | Source}
  */
 export class InterleavedBuffer {
+    readonly isInterleavedBuffer: true;
+
     /**
      * Create a new instance of {@link InterleavedBuffer}
      * @param array A {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray | TypedArray} with a shared buffer. Stores the geometry data.

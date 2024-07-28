@@ -1465,6 +1465,8 @@ class CrashyObject {
     }
 }
 
+declare function foobar<T>(): T;
+
 suite("assert", () => {
     test("assert", () => {
         const foo = "bar" as string;
@@ -2069,6 +2071,19 @@ suite("assert", () => {
         );
     });
 
+    test("changesBy", () => {
+        const obj = { value: 10 };
+        const fn = function() {
+            obj.value += 5;
+        };
+        const getterFn = function() {
+            return obj.value;
+        };
+
+        assert.changesBy(fn, obj, "value", 5);
+        assert.changesBy(fn, getterFn, 5);
+    });
+
     test("doesNotChange", () => {
         const obj = { z: 3 };
 
@@ -2105,6 +2120,19 @@ suite("assert", () => {
         );
     });
 
+    test("increasesBy", () => {
+        const obj = { value: 10 };
+        const incFn = function() {
+            obj.value += 5;
+        };
+        const getterFn = function() {
+            return obj.value;
+        };
+
+        assert.increasesBy(incFn, obj, "value", 5);
+        assert.increasesBy(incFn, getterFn, 5);
+    });
+
     test("doesNotIncrease", () => {
         const obj = { z: 3 };
 
@@ -2121,6 +2149,19 @@ suite("assert", () => {
             "z",
             "message",
         );
+    });
+
+    test("increasesButNotBy", () => {
+        const obj = { value: 10 };
+        const incFn = function() {
+            obj.value += 5;
+        };
+        const getterFn = function() {
+            return obj.value;
+        };
+
+        assert.increasesButNotBy(incFn, obj, "value", 1);
+        assert.increasesButNotBy(incFn, getterFn, 1);
     });
 
     test("decreases", () => {
@@ -2141,6 +2182,19 @@ suite("assert", () => {
         );
     });
 
+    test("decreasesBy", () => {
+        const obj = { value: 10 };
+        const decFn = function() {
+            obj.value -= 5;
+        };
+        const getterFn = function() {
+            return obj.value;
+        };
+
+        assert.decreasesBy(decFn, obj, "value", 5);
+        assert.decreasesBy(decFn, getterFn, 5);
+    });
+
     test("doesNotDecrease", () => {
         const obj = { z: 3 };
 
@@ -2159,9 +2213,34 @@ suite("assert", () => {
         );
     });
 
+    test("doesNotDecreaseBy", () => {
+        const obj = { value: 10 };
+        const decFn = function() {
+            obj.value -= 5;
+        };
+        const getterFn = function() {
+            return obj.value;
+        };
+
+        assert.doesNotDecreaseBy(decFn, obj, "val", 1);
+        assert.doesNotDecreaseBy(decFn, getterFn, 1);
+    });
+
+    test("decreasesButNotBy", () => {
+        const obj = { value: 10 };
+        const decFn = function() {
+            obj.value -= 5;
+        };
+        const getterFn = function() {
+            return obj.value;
+        };
+
+        assert.decreasesButNotBy(decFn, obj, "val", 1);
+        assert.decreasesButNotBy(decFn, getterFn, 1);
+    });
+
     test("ifError", () => {
         const obj = { z: 3 };
-
         assert.ifError(obj);
         assert.ifError(obj, "message");
     });
@@ -2411,5 +2490,101 @@ suite("assert", () => {
             { matcha: "yum" },
             "Should have correct value of the property",
         );
+    });
+
+    test("notIncludeDeepMembers", () => {
+        assert.notIncludeDeepMembers([{ a: 1 }, { b: 2 }, { c: 3 }], [{ b: 2 }], "not include deep members");
+    });
+});
+
+suite("narrowing", () => {
+    test("assert", () => {
+        const x = foobar<null | number>();
+        assert(typeof x === "number");
+        const y: number = x;
+    });
+
+    test("isOk", () => {
+        const x = foobar<null | number>();
+        assert.isOk(typeof x === "number");
+        const y: number = x;
+    });
+
+    test("ok", () => {
+        const x = foobar<null | number>();
+        assert.ok(typeof x === "number");
+        const y: number = x;
+    });
+
+    test("isTrue", () => {
+        const x = foobar<true | number>();
+        assert.isTrue(x);
+        const y: true = x;
+    });
+
+    test("isFalse", () => {
+        const x = foobar<false | number>();
+        assert.isFalse(x);
+        const y: false = x;
+    });
+
+    test("isNotTrue", () => {
+        const x = foobar<true | number>();
+        assert.isNotTrue(x);
+        const y: number = x;
+    });
+
+    test("isNotFalse", () => {
+        const x = foobar<false | number>();
+        assert.isNotFalse(x);
+        const y: number = x;
+    });
+
+    test("isNull", () => {
+        const x = foobar<null | number>();
+        assert.isNull(x);
+        const y: null = x;
+    });
+
+    test("isNotNull", () => {
+        const x = foobar<null | number>();
+        assert.isNotNull(x);
+        const y: number = x;
+    });
+
+    test("exists", () => {
+        const x = foobar<null | undefined | number>();
+        assert.exists(x);
+        const y: number = x;
+    });
+
+    test("notExists", () => {
+        const x = foobar<null | undefined | number>();
+        assert.notExists(x);
+        const y: null | undefined = x;
+    });
+
+    test("isUndefined", () => {
+        const x = foobar<undefined | number>();
+        assert.isUndefined(x);
+        const y: undefined = x;
+    });
+
+    test("isDefined", () => {
+        const x = foobar<undefined | number>();
+        assert.isDefined(x);
+        const y: number = x;
+    });
+
+    test("instanceOf", () => {
+        const x = foobar<Foo | null>();
+        assert.instanceOf(x, Foo);
+        const y: Foo = x;
+    });
+
+    test("notInstanceOf", () => {
+        const x = foobar<Foo | null>();
+        assert.notInstanceOf(x, Foo);
+        const y: null = x;
     });
 });

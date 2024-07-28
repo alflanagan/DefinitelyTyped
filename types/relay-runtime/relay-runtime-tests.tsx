@@ -132,6 +132,7 @@ const environment = new Environment({
             case "network.unsubscribe":
             case "execute.start":
             case "queryresource.fetch":
+            case "read.missing_required_field":
             default:
                 break;
         }
@@ -199,6 +200,9 @@ commitMutation<{
     updater(store, data) {
         const newName = data?.setUsername?.name;
         newName && store.get("userid")?.setValue(newName, "name");
+    },
+    onCompleted(_, errors) {
+        errors?.[0].path?.[0];
     },
 });
 
